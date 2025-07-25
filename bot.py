@@ -4,8 +4,8 @@ from flask import Flask
 from threading import Thread
 
 # === Settings ===
-TOKEN = "MTM4MTMyODM2MzA1MzkxMjA3NA.Gbb0Kp.y96-QuBnYqIdMvWBz7_0VSAIGFcykYdS7_PFPs"  # Replace with your actual bot token
-TICKET_CATEGORY_NAME = "🎫 Tickets"
+TOKEN = "MTM4MTMyODM2MzA1MzkxMjA3NA.Gbb0Kp.y96-QuBnYqIdMvWBz7_0VSAIGFcykYdS7_PFPs"
+TICKET_CATEGORY_ID = 1393886882668220486  # 🔁 Replace this with your actual Ticket Category ID (integer)
 
 intents = discord.Intents.default()
 intents.members = True
@@ -41,15 +41,14 @@ async def update_status():
     total_tickets = 0
 
     for guild in bot.guilds:
-        for category in guild.categories:
-            if category.name == TICKET_CATEGORY_NAME:
-                total_tickets += len(category.channels)
+        category = discord.utils.get(guild.categories, id=TICKET_CATEGORY_ID)
+        if category:
+            total_tickets += len([c for c in category.channels if isinstance(c, discord.TextChannel)])
 
     statuses = [
-        f"🎫 Tickets: {total_tickets}",
-        f"👥 Members: {total_members}",
-        f"💬 Messages: {message_count}",
-        f"🏠 Servers: {total_servers}",
+        f"Tickets: {total_tickets}",
+        f"Members: {total_members}",
+        f"Messages: {message_count}",
         "🤖 Powered by ZTX Hosting"
     ]
 
