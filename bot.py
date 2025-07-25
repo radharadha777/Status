@@ -56,7 +56,7 @@ async def on_message(message):
     await bot.process_commands(message)
 
 # === Bot Status Update ===
-@tasks.loop(seconds=5)
+@tasks.loop(seconds=20)  # Change status every 20 seconds
 async def update_status():
     global status_index
 
@@ -72,7 +72,7 @@ async def update_status():
         f"Tickets: {total_tickets}",
         f"Members: {total_members}",
         f"Message: {guild_message_count}",
-        "🤖 Powered by ZTX Hosting"
+        "ztxhosting.site"
     ]
 
     current_status = statuses[status_index % len(statuses)]
