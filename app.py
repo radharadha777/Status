@@ -1,62 +1,54 @@
-from flask import Flask, jsonify, send_from_directory
+from fastapi import FastAPI
 import requests
 import threading
 import time
-import os
+from fastapi.middleware.cors import CORSMiddleware
 
-app = Flask(__name__)
+app = FastAPI()
 
-# ✅ Aapke Nodes (Port 8080 Pterodactyl Wings)
-NODES = [
-    {"name": "Panel", "url": "https://panel.coramtix.in"},
-    {"name": "Node-IN-1", "url": "http://node-in-1.coramtix.in:8080"},
-    {"name": "Node-IN-2", "url": "http://node-in-2.coramtix.in:8080"},
-    {"name": "Node-IN-3", "url": "http://node-in-3.coramtix.in:8080"},
-]
+origins = ["*"]
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
-# ✅ Aapka Discord Webhook
-DISCORD_WEBHOOK = "https://discord.com/api/webhooks/1429028428639637548/ATe0k-CuzwTGRXMAioG0kA-V4nj3_m4PJzT7cFUtnPoYONVwBitWO2jR3tWvln6xGmir"
+WEBHOOK = ".."
 
-status_cache = {}
+nodes = {
+    "Panel": {"url": "https://panel.coramtix.in", "status": None},
+    "Node-1": {"url": "http://node1.cormtix.in:8080", "status": None},
+    "Node-2": {"url": "http://node2.cormtix.in:8080", "status": None},
+    "Node-3": {"url": "http://node3.cormtix.in:8080", "status": None},
+}
 
-def send_discord_alert(text):
-    try:
-        requests.post(DISCORD_WEBHOOK, json={"content": text}, timeout=5)
-    except:
-        pass
+def send_webhook(name, state):
+    data = {
+        "content": f"🚨 **{name} is now {state}**"
+    }
+    requests.post(WEBHOOK, json=data)
 
-def monitor():
+def check_nodes():
     while True:
-        for node in NODES:
+        for name, node in nodes.items():
             try:
-                r = requests.get(node["url"], timeout=4)
-                is_up = r.status_code in [200, 403]
+                r = requests.get(node["url"], timeout=5)
+                new_status = "Online" if r.status_code == 200 else "Offline"
             except:
-                is_up = False
+                new_status = "Offline"
 
-            prev = status_cache.get(node["name"])
-            status_cache[node["name"]] = is_up
+            if node["status"] is None:
+                node["status"] = new_status
+            elif node["status"] != new_status:
+                node["status"] = new_status
+                send_webhook(name, new_status)
 
-            if prev is None:
-                continue
+        time.sleep(30)
 
-            if prev != is_up:
-                if is_up:
-                    send_discord_alert(f"✅ `{node['name']}` is BACK ONLINE!")
-                else:
-                    send_discord_alert(f"❌ `{node['name']}` is DOWN!")
+threading.Thread(target=check_nodes, daemon=True).start()
 
-        time.sleep(20)
-
-threading.Thread(target=monitor, daemon=True).start()
-
-@app.route("/status")
-def status():
-    return jsonify(status_cache)
-
-@app.route("/")
-def home():
-    return send_from_directory(".", "index.html")
-
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000)
+@app.get("/status")
+def get_status():
+    return nodes
