@@ -1,156 +1,63 @@
 <!DOCTYPE html>
-<html lang="en" class="scroll-smooth">
+<html>
 <head>
-  <meta name="og:title" content="CoRamTix">
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
-  <meta name="description" content="CoRamTix Hosting – Game Servers, VPS & Bot Hosting with 24/7 uptime, smooth performance, and affordable prices.">
-  <meta name="keywords" content="game server hosting, bot hosting, discord bot hosting, Minecraft hosting, Rust hosting, ARK hosting, VPS hosting, low latency, DDoS protection">
-  <meta name="author" content="CoRamTix">
-  <meta name="robots" content="index, follow">
-  <title>CoRamTix – Hosting Evolved</title>
-  
-  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-  <link rel="shortcut icon" href="/favicon.ico" />
-  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
-  <link rel="manifest" href="/site.webmanifest" />
-
-  <meta property="og:type" content="website">
-  <meta property="og:url" content="">
-  <meta property="og:title" content="CoRamTix - Game Server Hosting">
-  <meta property="og:description" content="Powerful hosting for Minecraft, Rust, ARK, and more with 24/7 support. High-performance servers at affordable prices.">
-  <meta property="og:image" content="/ccbanner.png">
-  <meta property="og:image:width" content="1200">
-  <meta property="og:image:height" content="630">
-
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="CoRamTix - Game Server Hosting">
-  <meta name="twitter:description" content="Powerful hosting for Minecraft, Rust, ARK, and more with 24/7 support. High-performance servers at affordable prices.">
-  <meta name="twitter:image" content="/ccbanner.png">
-  
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-  <script src="https://cdn.tailwindcss.com"></script>
-  
-  <link rel="stylesheet" href="/style.css">
+<meta charset="UTF-8">
+<title>CoRamTix Live Status</title>
+<style>
+    body {
+        background: #050a1a;
+        color: #e6eaff;
+        font-family: 'Segoe UI', sans-serif;
+        text-align: center;
+        padding: 30px;
+    }
+    .title {
+        font-size: 32px;
+        font-weight: bold;
+        margin-bottom: 20px;
+        color: #6d9bff;
+    }
+    .node {
+        max-width: 350px;
+        margin: 12px auto;
+        padding: 18px;
+        border-radius: 12px;
+        background: #0f1738;
+        box-shadow: 0 0 12px rgba(0, 150, 255, 0.2);
+    }
+    .up {border-left: 8px solid #00e676;}
+    .down {border-left: 8px solid #ff3b3b;}
+</style>
 </head>
 <body>
 
-  <div id="preloader">
-    <div class="loader"></div>
-  </div>
+<div class="title">🚀 CoRamTix Uptime Monitor</div>
+<div id="nodes">Loading...</div>
 
-  <div id="content-wrapper">
-    <header class="bg-white/80 backdrop-blur-lg shadow-sm sticky top-0 z-50">
-      <div class="container mx-auto px-6 py-4 flex justify-between items-center">
-        <a href="/" class="flex items-center gap-3" aria-label="CoRamTix Homepage">
-          <img src="/favicon.svg" alt="CoRamTix Logo" class="h-9 w-9" />
-          <span class="text-2xl font-bold text-gray-800">CORAMTIX</span>
-        </a>
-        
-        <nav class="hidden md:flex items-center space-x-2">
-          <a href="/game-hosting" class="text-gray-600 font-medium px-4 py-2 rounded-md nav-link-underline">Game Hosting</a>
-          <a href="/bot-hosting" class="text-gray-600 font-medium px-4 py-2 rounded-md nav-link-underline">Bot Hosting</a>
-          <a href="/vps-hosting" class="text-gray-600 font-medium px-4 py-2 rounded-md nav-link-underline">VPS Hosting</a>
-          <a href="/support" class="text-gray-600 font-medium px-4 py-2 rounded-md nav-link-underline">Support</a>
-          <a href="/login" class="ml-4 bg-indigo-600 text-white font-medium px-5 py-2.5 rounded-lg shadow-md hover:bg-indigo-700">Login</a>
-        </nav>
+<script>
+async function refresh() {
+    try {
+        const res = await fetch("/status");
+        const data = await res.json();
+        let html = "";
 
-        <button id="mobile-menu-btn" class="md:hidden text-gray-700" aria-label="Toggle mobile menu" aria-expanded="false">
-          <svg class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" /></svg>
-        </button>
-      </div>
+        for (let node in data) {
+            let s = data[node];
+            html += `
+            <div class="node ${s ? 'up' : 'down'}">
+                <h2>${node}</h2>
+                <p>${s ? "✅ Online" : "❌ Offline"}</p>
+            </div>`;
+        }
+        document.getElementById("nodes").innerHTML = html;
+    } catch {
+        document.getElementById("nodes").innerHTML = "Error Loading…";
+    }
 
-      <div id="mobile-menu" class="hidden md:hidden bg-white px-4 pt-2 pb-4 space-y-2">
-          <a href="/game-hosting" class="block text-gray-600 hover:text-indigo-600 font-medium py-2">Game Hosting</a>
-          <a href="/bot-hosting" class="block text-gray-600 hover:text-indigo-600 font-medium py-2">Bot Hosting</a>
-          <a href="/vps-hosting" class="block text-gray-600 hover:text-indigo-600 font-medium py-2">VPS Hosting</a>
-          <a href="/support" class="block text-gray-600 hover:text-indigo-600 font-medium py-2">Support</a>
-          <a href="/login" class="block bg-indigo-600 text-white text-center font-medium mt-2 px-5 py-2.5 rounded-lg shadow-md hover:bg-indigo-700">Login</a>
-      </div>
-    </header>
-
-    <main>
-      <section class="hero-gradient text-white overflow-hidden">
-        <div class="container mx-auto px-6 py-24 md:py-32 text-center">
-          <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold mb-4 leading-tight">Premium Server Hosting</h1>
-          <p class="text-lg sm:text-xl max-w-3xl mx-auto opacity-90 mb-8">Get ultra-low latency with 99.99% uptime guarantee and premium hardware for your games, bots, and applications.</p>
-          <a href="/game-hosting" class="inline-block bg-white text-indigo-600 font-bold text-lg px-8 py-4 rounded-lg shadow-2xl cta-button">Get Started Now</a>
-        </div>
-      </section>
-
-      <div class="divide-y divide-gray-100 bg-white">
-        <section id="game-hosting-promo" class="py-20">
-          <div class="container mx-auto px-6 text-center">
-            <h2 class="text-3xl font-bold text-gray-800 mb-3">Game Hosting Plans</h2>
-            <p class="text-lg text-gray-600 mb-6">Perfect for Minecraft, Rust, FiveM, and other popular games.</p>
-            <a href="/game-hosting" class="inline-block bg-indigo-600 text-white font-semibold px-8 py-3 rounded-lg cta-button">View Game Plans</a>
-          </div>
-        </section>
-        <section id="bot-hosting-promo" class="py-20">
-          <div class="container mx-auto px-6 text-center">
-            <h2 class="text-3xl font-bold text-gray-800 mb-3">Bot Hosting</h2>
-            <p class="text-lg text-gray-600 mb-6">Reliable, 24/7 hosting for your Discord bots and other applications.</p>
-            <a href="/bot-hosting" class="inline-block bg-indigo-600 text-white font-semibold px-8 py-3 rounded-lg cta-button">View Bot Plans</a>
-          </div>
-        </section>
-        <section id="vps-hosting-promo" class="py-20">
-          <div class="container mx-auto px-6 text-center">
-            <h2 class="text-3xl font-bold text-gray-800 mb-3">VPS Hosting</h2>
-            <p class="text-lg text-gray-600 mb-6">High-performance virtual private servers with full root access.</p>
-            <a href="/vps-hosting" class="inline-block bg-indigo-600 text-white font-semibold px-8 py-3 rounded-lg cta-button">View VPS Plans</a>
-          </div>
-        </section>
-      </div>
-
-      <section class="bg-gray-50 py-20">
-        <div class="container mx-auto px-6">
-          <div class="text-center mb-12">
-            <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-4">Why Choose CoRamTix?</h2>
-            <p class="text-lg text-gray-600 max-w-2xl mx-auto">We provide the best infrastructure and support for your hosting needs.</p>
-          </div>
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            <div class="feature-card bg-white rounded-xl p-8 text-center">
-              <div class="flex justify-center items-center mb-4 text-indigo-500"><svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg></div>
-              <h3 class="text-xl font-semibold mb-3 text-gray-800">High Performance</h3>
-              <p class="text-gray-600">Latest generation hardware with NVMe storage for maximum speed.</p>
-            </div>
-            <div class="feature-card bg-white rounded-xl p-8 text-center">
-              <div class="flex justify-center items-center mb-4 text-indigo-500"><svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg></div>
-              <h3 class="text-xl font-semibold mb-3 text-gray-800">DDoS Protection</h3>
-              <p class="text-gray-600">Enterprise-grade protection against attacks and malicious traffic.</p>
-            </div>
-            <div class="feature-card bg-white rounded-xl p-8 text-center">
-              <div class="flex justify-center items-center mb-4 text-indigo-500"><svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a2 2 0 01-2-2V7a2 2 0 012-2h2.586a1 1 0 01.707.293l2.414 2.414a1 1 0 00.707.293H17z" /></svg></div>
-              <h3 class="text-xl font-semibold mb-3 text-gray-800">24/7 Support</h3>
-              <p class="text-gray-600">Our expert team is available around the clock to assist you.</p>
-            </div>
-            <div class="feature-card bg-white rounded-xl p-8 text-center">
-              <div class="flex justify-center items-center mb-4 text-indigo-500"><svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9V3m-9 9h18" /></svg></div>
-              <h3 class="text-xl font-semibold mb-3 text-gray-800">Global Network</h3>
-              <p class="text-gray-600">Low-latency servers in North America, Europe, and Asia.</p>
-            </div>
-          </div>
-        </div>
-      </section>
-    </main>
-
-    <footer class="bg-gray-800 text-white">
-      <div class="container mx-auto px-6 py-12">
-        <nav class="flex justify-center flex-wrap gap-x-6 gap-y-2 mb-8">
-          <a href="/terms-of-service" class="text-gray-400 hover:text-white">Terms of service</a>
-          <a href="/privacy-policy" class="text-gray-400 hover:text-white">Privacy policy</a>
-          <a href="/refund-policy" class="text-gray-400 hover:text-white">Refund policy</a>
-        </nav>
-        <div class="text-center text-gray-500 border-t border-gray-700 pt-8">
-          <p>&copy; <span id="copyright-year"></span> CoRamTix — Premium Server Hosting</p>
-        </div>
-      </div>
-    </footer>
-  </div>
-
-  <script src="/script.js"></script>
+    setTimeout(refresh, 5000);
+}
+refresh();
+</script>
 
 </body>
 </html>
