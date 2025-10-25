@@ -15,7 +15,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-WEBHOOK = ".."
+WEBHOOK = "https://discord.com/api/webhooks/1429028428639637548/ATe0k-CuzwTGRXMAioG0kA-V4nj3_m4PJzT7cFUtnPoYONVwBitWO2jR3tWvln6xGmir"
 
 nodes = {
     "Panel": {"url": "https://panel.coramtix.in", "status": None},
