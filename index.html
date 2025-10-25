@@ -1,63 +1,37 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>CoRamTix Live Status</title>
+<title>CoRamTix Node Status ✅</title>
 <style>
-    body {
-        background: #050a1a;
-        color: #e6eaff;
-        font-family: 'Segoe UI', sans-serif;
-        text-align: center;
-        padding: 30px;
-    }
-    .title {
-        font-size: 32px;
-        font-weight: bold;
-        margin-bottom: 20px;
-        color: #6d9bff;
-    }
-    .node {
-        max-width: 350px;
-        margin: 12px auto;
-        padding: 18px;
-        border-radius: 12px;
-        background: #0f1738;
-        box-shadow: 0 0 12px rgba(0, 150, 255, 0.2);
-    }
-    .up {border-left: 8px solid #00e676;}
-    .down {border-left: 8px solid #ff3b3b;}
+body { font-family: Arial, sans-serif; background:#0e1013; color:white; text-align:center; }
+.card {background:#1b1f24; padding:15px; margin:10px auto; width:260px;
+border-radius:10px; font-size:18px; }
+.status-online {color:#00ff6a; font-weight:bold;}
+.status-offline {color:#ff4255; font-weight:bold;}
 </style>
 </head>
 <body>
-
-<div class="title">🚀 CoRamTix Uptime Monitor</div>
-<div id="nodes">Loading...</div>
+<h1>🔹 CoRamTix System Monitor</h1>
+<div id="nodes"></div>
 
 <script>
-async function refresh() {
-    try {
-        const res = await fetch("/status");
-        const data = await res.json();
-        let html = "";
-
-        for (let node in data) {
-            let s = data[node];
-            html += `
-            <div class="node ${s ? 'up' : 'down'}">
-                <h2>${node}</h2>
-                <p>${s ? "✅ Online" : "❌ Offline"}</p>
-            </div>`;
-        }
-        document.getElementById("nodes").innerHTML = html;
-    } catch {
-        document.getElementById("nodes").innerHTML = "Error Loading…";
+async function loadStatus() {
+    let res = await fetch("https://YOUR_RENDER_BACKEND_URL/status");
+    let data = await res.json();
+    let html = "";
+    for (let name in data) {
+        let st = data[name].status;
+        let cls = st === "Online" ? "status-online" : "status-offline";
+        html += `<div class='card'>
+            ${name}: <span class='${cls}'>${st}</span>
+        </div>`;
     }
-
-    setTimeout(refresh, 5000);
+    document.getElementById("nodes").innerHTML = html;
 }
-refresh();
-</script>
 
+loadStatus();
+setInterval(loadStatus, 5000);
+</script>
 </body>
 </html>
