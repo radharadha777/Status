@@ -1,98 +1,62 @@
-import discord
-from discord.ext import commands, tasks
-from flask import Flask
-from threading import Thread
+from flask import Flask, jsonify, send_from_directory
+import requests
+import threading
+import time
 import os
 
-# === Settings ===
-TOKEN = "MTM4MTMyODM2MzA1MzkxMjA3NA.Gbb0Kp.y96-QuBnYqIdMvWBz7_0VSAIGFcykYdS7_PFPs"
-TICKET_CATEGORY_ID = 1393886882668220486  # Replace with your actual Ticket Category ID
-GUILD_ID = 1380792281048678441  # Only this server's messages are counted
-
-intents = discord.Intents.default()
-intents.members = True
-intents.guilds = True
-intents.messages = True
-intents.message_content = True
-
-bot = commands.Bot(command_prefix="!", intents=intents)
-
-# === Load message counts ===
-message_count = 0
-guild_message_count = 0
-
-if os.path.exists("message_count.txt"):
-    with open("message_count.txt", "r") as f:
-        message_count = int(f.read())
-
-if os.path.exists("guild_message_count.txt"):
-    with open("guild_message_count.txt", "r") as f:
-        guild_message_count = int(f.read())
-
-status_index = 0
-
-# === Events ===
-@bot.event
-async def on_ready():
-    print(f"✅ Logged in as {bot.user}")
-    update_status.start()
-
-@bot.event
-async def on_message(message):
-    global message_count, guild_message_count
-    if not message.author.bot:
-        message_count += 1
-
-        # Save total message count
-        with open("message_count.txt", "w") as f:
-            f.write(str(message_count))
-
-        # Count only messages from one specific server
-        if message.guild and message.guild.id == GUILD_ID:
-            guild_message_count += 1
-            with open("guild_message_count.txt", "w") as f:
-                f.write(str(guild_message_count))
-
-    await bot.process_commands(message)
-
-# === Bot Status Update ===
-@tasks.loop(seconds=20)  # Change status every 20 seconds
-async def update_status():
-    global status_index
-
-    total_members = sum(g.member_count for g in bot.guilds)
-    total_tickets = 0
-
-    for guild in bot.guilds:
-        category = discord.utils.get(guild.categories, id=TICKET_CATEGORY_ID)
-        if category:
-            total_tickets += len([c for c in category.channels if isinstance(c, discord.TextChannel)])
-
-    statuses = [
-        f"Tickets: {total_tickets}",
-        f"Members: {total_members}",
-        f"Message: {guild_message_count}",
-        "ztxhosting.site"
-    ]
-
-    current_status = statuses[status_index % len(statuses)]
-    await bot.change_presence(activity=discord.Game(name=current_status))
-    status_index += 1
-
-# === Flask Keep-Alive Server ===
 app = Flask(__name__)
 
-@app.route('/')
+# ✅ Aapke Nodes (Port 8080 Pterodactyl Wings)
+NODES = [
+    {"name": "Panel", "url": "https://panel.coramtix.in"},
+    {"name": "Node-IN-1", "url": "http://node-in-1.coramtix.in:8080"},
+    {"name": "Node-IN-2", "url": "http://node-in-2.coramtix.in:8080"},
+    {"name": "Node-IN-3", "url": "http://node-in-3.coramtix.in:8080"},
+]
+
+# ✅ Aapka Discord Webhook
+DISCORD_WEBHOOK = "YOUR_WEBHOOK_URL_HERE"
+
+status_cache = {}
+
+def send_discord_alert(text):
+    try:
+        requests.post(DISCORD_WEBHOOK, json={"content": text}, timeout=5)
+    except:
+        pass
+
+def monitor():
+    while True:
+        for node in NODES:
+            try:
+                r = requests.get(node["url"], timeout=4)
+                is_up = r.status_code in [200, 403]
+            except:
+                is_up = False
+
+            prev = status_cache.get(node["name"])
+            status_cache[node["name"]] = is_up
+
+            if prev is None:
+                continue
+
+            if prev != is_up:
+                if is_up:
+                    send_discord_alert(f"✅ `{node['name']}` is BACK ONLINE!")
+                else:
+                    send_discord_alert(f"❌ `{node['name']}` is DOWN!")
+
+        time.sleep(20)
+
+threading.Thread(target=monitor, daemon=True).start()
+
+@app.route("/status")
+def status():
+    return jsonify(status_cache)
+
+@app.route("/")
 def home():
-    return "✅ Ticket Bot is Online!"
+    return send_from_directory(".", "index.html")
 
-def run_web():
-    app.run(host='0.0.0.0', port=8080)
-
-def keep_alive():
-    t = Thread(target=run_web)
-    t.start()
-
-# === Start Bot ===
-keep_alive()
-bot.run(TOKEN)
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5000)
